@@ -1,0 +1,121 @@
+# Human-gated issue agents. Nothing runs on issue creation: a maintainer must
+# apply one approval label, a deterministic evaluator must pass, and the agent
+# can only open a DRAFT pull request that a human reviews and merges.
+#
+#   agent:autofix-approved    bug (user-reported)    -> fix -> draft PR
+#   agent:plan-approved       feature-request        -> PRD + tasks written onto the same issue
+#   agent:implement-approved  planned feature-request -> implement -> draft PR
+#
+# Setup: secret ANTHROPIC_API_KEY (an org workspace key, not a personal
+# subscription token); create the labels; restrict who can label issues
+# (Triage role or above). claude-code-action also refuses to run unless the
+# actor who applied the label has write access to the repo.
+name: Agent - issues
+
+on:
+  issues:
+    types: [labeled] # never "opened": an issue created already carrying an approval label would skip human triage
+
+permissions: {}
+
+# Concurrency lives on the jobs, not the workflow: every label event (a
+# triager's "priority", the agent's own "planned") starts a run, and a
+# workflow-level group would let those skipped runs cancel a working agent.
+jobs:
+  evaluate:
+    if: startsWith(github.event.label.name, 'agent:') && endsWith(github.event.label.name, '-approved')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    outputs:
+      mode: ${{ steps.eval.outputs.mode }}
+      eligible: ${{ steps.eval.outputs.eligible }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+      - id: eval
+        run: node scripts/evaluate-issue.mjs
+      - name: Explain a block on the issue
+        if: steps.eval.outputs.eligible != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REASON: ${{ steps.eval.outputs.reason }}
+          LABEL: ${{ github.event.label.name }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" --repo "$GITHUB_REPOSITORY" --body \
+            "Agent run not started: the evaluator blocked this issue. Reason: ${REASON}. Narrow the scope, then re-apply \`${LABEL}\`."
+
+  agent:
+    needs: evaluate
+    if: needs.evaluate.outputs.eligible == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    # Re-applying an approval label replaces the previous run for this issue.
+    concurrency:
+      group: agent-issue-${{ github.event.issue.number }}
+      cancel-in-progress: true
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      # The issue title/body are deliberately NOT interpolated into the prompt.
+      # The agent reads them with `gh issue view` and the skills treat them as
+      # untrusted data. Tool allowlists are per mode and exclude arbitrary
+      # interpreters (node -e, npx), network tools and broad gh access.
+      - name: Run agent (autofix)
+        if: needs.evaluate.outputs.mode == 'autofix'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Run the repository skill /issue-autofix for issue #${{ github.event.issue.number }} in ${{ github.repository }}.
+          claude_args: |
+            --model claude-opus-5-5
+            --max-turns 40
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh pr create:*),Bash(git checkout -b:*),Bash(git add:*),Bash(git commit:*),Bash(git push origin agent/*),Bash(git status),Bash(git diff:*),Bash(npm run lint),Bash(npm run typecheck),Bash(npm test)"
+
+      - name: Run agent (plan)
+        if: needs.evaluate.outputs.mode == 'plan'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Run the repository skill /feature-plan for issue #${{ github.event.issue.number }} in ${{ github.repository }}.
+          claude_args: |
+            --model claude-opus-5-5
+            --max-turns 40
+            --allowedTools "Read,Grep,Glob,Bash(gh issue view:*),Bash(gh issue list:*),Bash(gh issue edit:*),Bash(gh issue comment:*)"
+
+      - name: Run agent (implement)
+        if: needs.evaluate.outputs.mode == 'implement'
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Run the repository skill /feature-implement for issue #${{ github.event.issue.number }} in ${{ github.repository }}.
+          claude_args: |
+            --model claude-opus-5-5
+            --max-turns 80
+            --allowedTools "Read,Grep,Glob,Edit,Write,Bash(gh issue view:*),Bash(gh issue comment:*),Bash(gh issue edit:*),Bash(gh pr create:*),Bash(git checkout -b:*),Bash(git add:*),Bash(git commit:*),Bash(git push origin agent/*),Bash(git status),Bash(git diff:*),Bash(npm run lint),Bash(npm run typecheck),Bash(npm test)"
+
+      - name: Report failure on the issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ github.event.issue.number }}" --repo "$GITHUB_REPOSITORY" --body \
+            "The agent run did not finish (turn budget, timeout or error). See ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }} and continue manually or narrow the scope."
