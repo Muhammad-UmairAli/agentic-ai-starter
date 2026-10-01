@@ -15,7 +15,7 @@ Implemented: `AGENTS.md` (rules; `CLAUDE.md` imports it), `.claude/settings.json
 | **PostToolUseFailure hook `check-failure-hint.sh`** | After a failed lint, typecheck or test, tells the agent to fix the errors (not disable rules or skip tests) and re-run all checks |
 | **Skills** | `issue-autofix`, `feature-plan`, `feature-implement`, `pr-review` (CI); `branch-and-commit` (local helper that suggests 3 branch names and a Conventional Commit message, without committing) |
 | **MCP `context7`** | Up-to-date library docs for agents. Version pinned |
-| **Git hooks for people** (recommended) | Format and lint staged files on commit, typecheck on push. The source used Husky with lint-staged; add one when the team wants it |
+| **Git hooks for people** (recommended) | Format and lint staged files on commit, typecheck on push. For example, Husky with lint-staged; add one when the team wants it |
 
 ## 4. Functional rules
 - **R1** Native permission rules beat hooks wherever they can express the policy (deny is simpler and can't be bypassed by a shell quirk). Use hooks for **ask** decisions and for adding context.
@@ -48,8 +48,3 @@ Hook script error: the action proceeds (fail open). Make the hook's error visibl
 
 ## 11. Rebuild checklist
 Write AGENTS.md, then deny rules, then the two hooks, then skills, then pinned MCP servers, then (optionally) git hooks for people.
-
-## 12. Pitfalls seen in the source system
-- The env-file protection was an **ask** hook, so one click of approval was enough. Deny is stronger.
-- Editor-specific skill copies drifted from the CI copies.
-- Some rules lived only in the editor config, so CI agents never saw them.

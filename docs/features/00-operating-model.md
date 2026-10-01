@@ -86,4 +86,4 @@ stateDiagram-v2
 | PR review | 40 | 30 min |
 | Mention | 20 | 20 min |
 
-Start low and raise only when metrics show runs being cut off. Keep the docs and the workflow numbers in sync. The source system's docs drifted from its config.
+Start low and raise only when metrics show runs being cut off. Keep the docs and the workflow numbers in sync.

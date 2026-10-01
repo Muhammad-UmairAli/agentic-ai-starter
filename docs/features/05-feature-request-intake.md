@@ -58,7 +58,3 @@ Same as 04.
 
 ## 11. Rebuild checklist
 Reuse the 04 pipeline with this schema, body template and limit. Create the `feature-request`, `planned`, `agent:plan-approved` and `agent:implement-approved` labels.
-
-## 12. Pitfalls seen in the source system
-- The description was written **twice**: once at the top and again under `## User request`. Keep a single copy.
-- The reporter's email and name were included, as in 04.

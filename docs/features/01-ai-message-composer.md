@@ -109,14 +109,3 @@ Don't show a canned template as a fallback when generation fails. A fake draft m
 5. Screen the output, then return text.
 6. Build the UI: policy gate, options, preview, Rewrite, Use draft. Never auto-send.
 7. Add analytics with no content, plus an eval set of real-shaped facts before any change of model or prompt.
-
-## 12. Pitfalls seen in the source system
-- The request carried a group ID that was **never authorized**. Fixed by R1.
-- The DTO had validation decorators, but no validation pipe ran on that route, so none of the rules applied.
-- The user-provided subject was collected but **never put in the prompt**. The prompt's subject rules referred to a value the model never saw.
-- JSON was parsed by brace-scanning and a "repair" step. Use structured outputs.
-- The output came back as HTML and was inserted into a rich editor. The editor's own sanitizer then stripped the inline table styles the prompt required, so prompt and renderer fought each other.
-- Full prompts and raw responses were logged, which leaked drafts and group data into logs. Those logs were then attached to bug reports (04).
-- Errors were converted to HTTP exceptions **before** the retry wrapper inspected them, so retries probably never happened (inferred). Retry at one layer, on typed provider errors (429/5xx/network).
-- The rate-limit config existed but was never wired to the route.
-- On server errors, the client showed a canned "Dear [Recipient], I am writing to inquire about…" draft. That text broke the group-greeting rule and could be sent as-is.

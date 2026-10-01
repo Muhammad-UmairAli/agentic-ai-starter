@@ -85,12 +85,3 @@ Secret `ANTHROPIC_API_KEY`. Labels per 00. Evaluator limits are in `LIMITS` and 
 4. Create the labels, secret and branch protection.
 5. Dry-run with good, risky and malicious issues.
 6. Put the metrics in 00 on a dashboard.
-
-## 12. Pitfalls seen in the source system
-- Prompts interpolated the raw issue title and body. One repo used a spoofable `<<<END>>>` delimiter; another had **no delimiter at all**.
-- The allowlists included `Bash(node:*)`, `Bash(npx:*)` and `Bash(gh:*)`, which amounts to arbitrary code execution with a write token.
-- One repo ran autofix on **every newly opened issue**, with no label and no evaluator.
-- Workflows also triggered on `opened` when the label was already present.
-- The docs listed 25 turns, 45 minutes and 3 files while the code had 50, 90 and 6. Keep one source of truth.
-- Agents ran lint and typecheck but not tests, and CI didn't run the full suite either.
-- CI authenticated with a personal subscription token, which tied cost and audit to one person.

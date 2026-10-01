@@ -105,12 +105,3 @@ No AI at submit time, by design. The issue structure (labelled sections, area, s
 2. Server: schema, auth, rate limit, neutralize and redact, issue builder, GitHub client with the 422 fallback.
 3. Create a bot account and fine-grained token; create the `user-reported` and `area:*` labels.
 4. Agree on a triage SOP (00) before go-live.
-
-## 12. Pitfalls seen in the source system
-- The last 50 lines of a **process-wide** server log buffer were attached to every report, with only Bearer tokens scrubbed. Other users' data (and logged AI prompts) could end up in GitHub.
-- The reporter's email and display name were written into the issue.
-- `@` in the description wasn't defanged. A mention-triggered workflow fired on newly opened issues, so app users could start an agent with no triage.
-- Attachment URLs weren't validated as URLs or hosts.
-- Logs were fenced with backticks, so content with backticks could close the fence.
-- The docs called log capture optional, but the client always sent it.
-- Rate-limit and env configuration used environment-specific variable names in every environment, which invites misconfiguration.

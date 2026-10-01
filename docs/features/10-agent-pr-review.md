@@ -18,7 +18,7 @@ On PR opened, synchronized, reopened or marked ready for review, the review job 
   3. **AI usage:** structured outputs, refusal handling, timeouts, rate limits, cost per call.
   4. **Performance:** client bundle and lazy loading, needless client components, N+1 calls, leaked subscriptions or listeners, list keys.
   5. **Maintainability:** layering, naming, duplication vs. premature abstraction, function complexity under ~10.
-  6. **Framework-specific anti-patterns:** keep a short, stack-specific checklist in the skill (the source had one for its UI framework covering subscription teardown, nested subscribes, state mutation outside actions, wrong import entry points, missing list tracking, missing keyboard handlers in modals, mobile keyboard overlap, and design-token misuse).
+  6. **Framework-specific anti-patterns:** keep a short, stack-specific checklist in the skill, e.g. subscription teardown, state mutation outside actions, missing keyboard handlers in modals, design-token misuse.
   7. **Tests:** new logic has a check that would fail if it broke.
 - **R4 Thread reconciliation:** load earlier review comments. For each unresolved thread, if the diff now addresses it, **resolve it** through the GraphQL `resolveReviewThread` mutation. Otherwise list it under "Previous review comments".
 - **R5 Output:** inline comments only for concrete, actionable issues with a suggested fix, ranked Critical > High > Medium > Low. One summary comment: what changed, blocking issues, prioritized suggestions, overall assessment, previous comments resolved or open, and good patterns.
@@ -30,7 +30,7 @@ On PR opened, synchronized, reopened or marked ready for review, the review job 
 One summary PR comment per run (don't use a sticky progress comment as well, it duplicates noise) plus inline comments.
 
 ## 6. AI design
-A read-mostly agent. **Alternative used in the source:** Anthropic's official `code-review` plugin, loaded through the action's plugin marketplace inputs, which needs no custom rubric. Use the plugin to start fast, and a custom skill once you have house rules.
+A read-mostly agent. **Alternative:** Anthropic's official `code-review` plugin, loaded through the action's plugin marketplace inputs, which needs no custom rubric. Use the plugin to start fast, and a custom skill once you have house rules.
 
 ## 7. Security and privacy
 The PR head code is checked out, but nothing from it runs: no install, no build. GraphQL access is limited by the job token's permissions (contents read).
@@ -48,7 +48,3 @@ Secret `ANTHROPIC_API_KEY`. 40 turns, 30 minutes.
 
 ## 11. Rebuild checklist
 Workflow, then skill (rubric plus stack checklist), then secret, then try it on three recent real PRs and tune the rubric to cut noise.
-
-## 12. Pitfalls seen in the source system
-- The model was pinned to an older version. Revisit it when models change.
-- Agent drafts were identified by bot actor name. A branch prefix is more robust and easier to test.

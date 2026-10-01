@@ -1,6 +1,6 @@
 # Feature specifications
 
-These specs describe each agentic AI feature in enough detail to rebuild it in a new project on any stack, without the source system that inspired it. They are white-label: generic product terms, synthetic examples, no customer data.
+These specs describe each agentic AI feature in enough detail to rebuild it in a new project on any stack. They are white-label: generic product terms, synthetic examples, no customer data.
 
 | | |
 |---|---|
@@ -64,6 +64,5 @@ Every feature file uses the same sections, so specs are easy to compare and chec
 9. **Configuration**: settings and defaults.
 10. **Acceptance checks**: what to test before calling it done.
 11. **Rebuild checklist**: stack-agnostic steps.
-12. **Pitfalls**: mistakes the source system made, or nearly made.
 
 Values marked _default_ are starting points to tune per product, not requirements. Anything marked **Decision** needs an owner's sign-off (product, legal or security) in each new project.

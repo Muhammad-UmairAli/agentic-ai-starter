@@ -41,7 +41,3 @@ Secret `ANTHROPIC_API_KEY`.
 
 ## 11. Rebuild checklist
 The workflow with both gates, then test with member and non-member accounts.
-
-## 12. Pitfalls seen in the source system
-- The mention job also fired on **newly opened issues containing `@claude`**. Issues created by the intake service account passed the action's write check, so any app user could start the agent with write permissions and skip triage.
-- It was described as read-only but had contents, PR and issue write permissions.

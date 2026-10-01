@@ -43,7 +43,3 @@ Label `agent:implement-approved`.
 
 ## 11. Rebuild checklist
 Evaluator implement rules, then the workflow step, then the skill, then label and branch protection, then a dry run on a small planned feature.
-
-## 12. Pitfalls seen in the source system
-- The original budget was 120 turns and 150 minutes, with broad tools including `node` and `npx`. That is expensive and risky. Start smaller.
-- "Do not modify `.github/` or env files unless the PRD requires it" let a plan open the door to those changes. Require a human to edit risky scope in by hand instead.

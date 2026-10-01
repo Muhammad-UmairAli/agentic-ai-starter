@@ -43,7 +43,3 @@ GitHub error: the page shows an error and Retry, and the server logs the status.
 1. Write the commit fetch plus filter with a 5-minute server cache.
 2. Build the page with loading, error and retry states.
 3. Document the commit convention in CONTRIBUTING and AGENTS.md, and enforce it in review.
-
-## 12. Pitfalls seen in the source system
-- A `?refresh=true` query parameter let any signed-in user skip the server cache.
-- The changelog branch defaulted to the integration branch, so unreleased work could show as "new". Point it at what is actually deployed.

@@ -31,7 +31,7 @@ Implemented in `src/lib/moderation.ts` (`screen`, `classifyText`, `standing`) an
 - **R6 Suspension** (both rules are evaluated independently, from one 24-hour query):
   - **more than 3** violations in the last **30 minutes**: paused until enough of them age out to bring the count back to 3, i.e. until strike number `count − 3` (oldest first) is 30 minutes old (report remaining minutes, minimum 1)
   - **more than 10** violations in the last **24 hours**: paused until strike number `count − 10` is 24 hours old (report remaining hours, minimum 1)
-  - Computing the time left from the *oldest* strike under-reports the wait whenever there are more than limit + 1 strikes. The source system did this.
+  - Computing the time left from the *oldest* strike under-reports the wait whenever there are more than limit + 1 strikes.
 - **R7** A suspension applies to **every** surface, including the composer.
 - **R8 Kill switch:** an ops flag skips **only** the AI step during a provider outage. The word list and suspensions keep running.
 - **R9** Throttle the pre-send check endpoint per user (_default_ 30/min), so one account can't drain the shared provider quota.
@@ -65,7 +65,7 @@ Implemented in `src/lib/moderation.ts` (`screen`, `classifyText`, `standing`) an
 - The system prompt describes the audience (families and minors) and says ordinary banter isn't a violation. Texts go in `<text>` tags as data.
 - **A refusal counts as flagged** (fail closed).
 - **Alternative:** a dedicated moderation endpoint (e.g. OpenAI `omni-moderation-latest`, which is free) with a short timeout (~3 s) and one retry. Merge per-text results: flagged if any is, categories OR'd, max score per category. Choose per client on cost and latency.
-- The client's own timeout must be shorter than the composer's safety reset. The source used 8 s on the client and about 6.5 s on the server.
+- The client's own timeout must be shorter than the composer's safety reset.
 
 ## 7. Security and privacy
 - **Never log** the screened text. Log event names, surface and categories only.
@@ -101,9 +101,3 @@ Implemented in `src/lib/moderation.ts` (`screen`, `classifyText`, `standing`) an
 4. On the client, map error codes to alerts and keep the draft.
 5. For direct-to-database clients, add server-side enforcement (R10).
 6. Add a kill switch, a throttle and dashboards (block rate per surface, provider error rate).
-
-## 12. Pitfalls seen in the source system
-- The standing check returned "allowed" whenever there were **fewer than 3 violations in the last 15 minutes**, before evaluating the other rules. The 24-hour limit therefore never fired for a steady abuser (about 190 violations a day passed). Evaluate the rules independently.
-- An "AI status" endpoint returned the whole standing object as `isAllowed`, so it was always truthy.
-- The organization ID column was never filled in, so the org-deletion purge deleted nothing. Chat violations had no group ID, so they were never purged either.
-- Chat writes went straight to the database. Moderation was client-side only, and a modified client could skip it.

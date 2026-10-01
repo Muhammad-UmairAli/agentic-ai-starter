@@ -54,7 +54,3 @@ Vendor upload preset with moderation enabled. Allowed file types and size per su
 3. Write one client upload helper with a `throwIfRejected` step.
 4. Use the helper on every upload call site.
 5. Add the typed error and message, then test with known images.
-
-## 12. Pitfalls seen in the source system
-- An earlier design passed the moderation flag as a signed upload parameter from the client, which a modified client could drop. It moved to the vendor's default preset.
-- Bug-report screenshots used a separate storage path with no moderation.

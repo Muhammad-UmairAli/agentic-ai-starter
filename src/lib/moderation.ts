@@ -38,9 +38,8 @@ export function recordStrike(userId: string, now = Date.now()) {
 }
 
 /**
- * Both rules are enforced independently. (The source system let a quiet
- * last 15 minutes override the 24 h rule, so steady abusers were never
- * suspended by it.)
+ * Both rules are enforced independently, so a quiet last 15 minutes never
+ * overrides the 24 h rule.
  */
 export function standing(userId: string, now = Date.now()): { allowed: true } | { allowed: false; message: string } {
   // Posting resumes when enough strikes age out to bring the count back to

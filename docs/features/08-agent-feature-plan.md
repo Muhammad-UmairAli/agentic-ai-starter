@@ -51,7 +51,3 @@ Labels `feature-request`, `agent:plan-approved`, `planned`.
 
 ## 11. Rebuild checklist
 Evaluator plan rules, then the workflow step with read-only tools, then the skill with exact headings, then labels, then a dry run.
-
-## 12. Pitfalls seen in the source system
-- The turn budget was the most common failure ("planning turn limit"). Keep the skill focused, and raise turns only from metrics.
-- The editor-specific copy of the planning skill drifted from the CI copy. Keep one canonical skill.
