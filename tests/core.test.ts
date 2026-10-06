@@ -50,6 +50,16 @@ describe("moderation", () => {
     expect(await screen("u-outage", ["hello team"])).toMatchObject({ ok: false, code: "MODERATION_UNAVAILABLE" });
   });
 
+  it("keeps a suspended user blocked even when there is no text to screen", async () => {
+    const spy = vi.spyOn(ai, "moderate");
+    const now = Date.now();
+    for (let i = 0; i < 4; i++) recordStrike("u-suspended-empty", now - i * MIN);
+    expect(await screen("u-suspended-empty", ["", "  ", null])).toMatchObject({ ok: false, code: "POSTING_SUSPENDED" });
+    expect(spy).not.toHaveBeenCalled();
+    // A user in good standing with no text is still a no-op pass.
+    expect(await screen("u-empty-ok", [""])).toEqual({ ok: true });
+  });
+
   it("passes clean text", async () => {
     expect(await screen("u-clean", ["See everyone at practice at 5!"])).toEqual({ ok: true });
   });
