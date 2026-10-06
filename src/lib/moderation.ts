@@ -81,10 +81,13 @@ export async function classifyText(texts: string[]): Promise<"clean" | "flagged"
  */
 export async function screen(userId: string, fields: Array<string | null | undefined>): Promise<ScreenResult> {
   const texts = [...new Set(fields.map((f) => f?.trim() ?? "").filter(Boolean))];
-  if (texts.length === 0) return { ok: true };
 
+  // Suspension applies even with no text to classify (e.g. a composer request
+  // built only from facts), so check it before the empty-input shortcut.
   const s = standing(userId);
   if (!s.allowed) return { ok: false, code: "POSTING_SUSPENDED", message: s.message };
+
+  if (texts.length === 0) return { ok: true };
 
   const verdict = await classifyText(texts);
   if (verdict === "unavailable") return { ok: false, code: "MODERATION_UNAVAILABLE", message: UNAVAILABLE_MESSAGE };
